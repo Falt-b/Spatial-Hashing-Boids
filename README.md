@@ -1,2 +1,2 @@
 # Spatial-Hashing-Boids
-rework of previous Bdois program
+rework of previous Boids program
