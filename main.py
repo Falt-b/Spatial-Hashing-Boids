@@ -5,7 +5,7 @@ from random import randint
 
 WIDTH = 400
 HEIGHT = 400
-FPS = 60
+FRAME_CAP = 60
 BG_COLOR = (20, 20, 20)
 PALLETTE = [
     (174, 167, 209),
@@ -32,9 +32,9 @@ class HashMap:
         self.items.setdefault(hash, np.array([item], object))
         return 0
 
-    def remove_item(self, item_index: int, hash: int):
-        self.items[hash] = np.delete(self.items[hash], item_index)
-        self.update_indexes(hash, item_index, -1)
+    def remove_item(self, item: object):
+        self.items[item.hash] = np.delete(self.items[item.hash], item.index)
+        self.update_indexes(item.hash, item.index, -1)
 
     def update_indexes(self, hash: int, index: int, amount: int):
         for item in self.items[hash][index + 1 :]:
@@ -53,15 +53,18 @@ class HashMap:
 
 
 class Boid(pygame.sprite.Sprite):
-    def __init__(self, color: tuple, x: int, y: int, id: int = 0) -> None:
+    def __init__(
+        self, color: tuple, x: int, y: int, id: int = 0, fill: int = 0
+    ) -> None:
         pygame.sprite.Sprite.__init__(self)
         self.color = color
-        self.image = pygame.surface.Surface((24, 16)).convert()
+        self.image = pygame.surface.Surface((24, 10)).convert()
         self.image.fill(BG_COLOR)
         pygame.draw.polygon(
             self.image,
             self.color,
-            [(0, 0), (24, 8), (0, 16), (5, 8)],
+            [(0, 1), (6, 5), (15, 0), (24, 5), (15, 10), (6, 5), (0, 9)],
+            fill,
         )
         self.original_image = self.image.copy().convert()
         self.original_image.set_colorkey((0, 0, 0))
@@ -73,6 +76,7 @@ class Boid(pygame.sprite.Sprite):
         self.pos = np.array([x, y], float)
         self.vel = np.array([0, 0], float)
         self.accel = np.array([0, 0], float)
+        self.hash = 0
         self.index = 0
         self.id = id
 
@@ -99,13 +103,13 @@ def main():
     last_frame = 0
     running = True
 
-    b1 = Boid((30, 160, 8), 200, 200)
+    b1 = Boid(PALLETTE[0], 200, 200, fill=1)
     boids = pygame.sprite.Group()
     boids.add(b1)
     a = 0
 
     while running:
-        clock.tick(FPS)
+        clock.tick(FRAME_CAP)
         t = pygame.time.get_ticks()
         dt = (t - last_frame) / 1000
         last_frame = t
