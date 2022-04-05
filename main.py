@@ -83,6 +83,12 @@ class Boid(pygame.sprite.Sprite):
         )
 
     def update(self, angle) -> None:
+        # take in list of boids
+        # get the distance from each one in ordered array
+        # sort array
+        # get data from bodis
+        # apply behaviors with information
+        
         # rotating and update the image
         self.image = pygame.transform.rotate(self.original_image, angle)
         self.rect = self.image.get_rect(center=self.pos)
