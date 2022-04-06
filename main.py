@@ -117,8 +117,9 @@ class Boid(pygame.sprite.Sprite):
 
         # rotating and update the image
         angle = ORIGIN.angle_to(self.vel)
-        self.image = pygame.transform.rotate(self.original_image, angle)
+        self.image = pygame.transform.rotate(self.original_image, -1 * angle)
         self.rect = self.image.get_rect(center=self.pos)
+        self.pos += self.vel
 
 
 def main():
@@ -135,6 +136,7 @@ def main():
     boids = pygame.sprite.Group()
     boids.add(b1)
     a = 0
+    b1.vel = np.array([0.034, -0.02], float)
 
     while running:
         clock.tick(FRAME_CAP)
@@ -153,7 +155,7 @@ def main():
             a = 0
         a += 2
 
-        boids.update(a)
+        boids.update()
         boids.draw(screen)
         pygame.draw.circle(screen, (255, 0, 0), b1.pos, 2)
 
