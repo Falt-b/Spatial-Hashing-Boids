@@ -16,6 +16,7 @@ PALLETTE = [
 ]
 BOIDS = 70
 CAPTION = "Boids with pygame"
+ORIGIN = pygame.Vector2(0, 0)
 
 
 class HashMap:
@@ -76,6 +77,7 @@ class Boid(pygame.sprite.Sprite):
         self.pos = np.array([x, y], float)
         self.vel = np.array([0, 0], float)
         self.accel = np.array([0, 0], float)
+        self.view_range = 100
         self.hash = 0
         self.index = 0
         self.id = id
@@ -86,9 +88,35 @@ class Boid(pygame.sprite.Sprite):
             + int(self.pos[1] / container_size) * table_width
         )
 
-    def update(self, angle) -> None:
+    def get_values(self, boids: np.array):
+        if boids.size() < 1:
+            return 0, 0, 0
+
+        pos = np.array([], float)
+        vel = np.array([], float)
+        dist = np.array([], float)
+        for boid in boids:
+            d = ((self.pos[0] - boid.pos[0]) * (self.pos[0] - boid.pos[0])) + (
+                (self.pos[1] - boid.pos[1]) * (self.pos[1] - boid.pos[1])
+            )
+            if boid != self and d <= 10000:
+                dist = np.append(dist, d)
+                if boid.id == self.id:
+                    pos = np.append(pos, boid.pos)
+                    vel = np.append(vel, boid.vel)
+        smallest_dist = np.argsort(dist)[0]
+        sum_pos = np.sum(np.reshape(pos, (-1, 2)))
+        sum_vel = np.sum(np.reshape(vel, (-1, 2)))
+        return (
+            smallest_dist,
+            np.divide(sum_pos, boids.size()),
+            np.divide(sum_vel, boids.size()),
+        )
+
+    def update(self) -> None:
 
         # rotating and update the image
+        angle = ORIGIN.angle_to(self.vel)
         self.image = pygame.transform.rotate(self.original_image, angle)
         self.rect = self.image.get_rect(center=self.pos)
 
@@ -103,7 +131,7 @@ def main():
     last_frame = 0
     running = True
 
-    b1 = Boid(PALLETTE[0], 200, 200, fill=1)
+    b1 = Boid(PALLETTE[0], 200, 200)
     boids = pygame.sprite.Group()
     boids.add(b1)
     a = 0
