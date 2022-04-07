@@ -105,16 +105,13 @@ class Boid(pygame.sprite.Sprite):
         )
 
     def update(self) -> None:
-<<<<<<< HEAD
         pass
-=======
 
         # rotating and update the image
         angle = ORIGIN.angle_to(self.vel)
         self.image = pygame.transform.rotate(self.original_image, -1 * angle)
         self.rect = self.image.get_rect(center=self.pos)
         self.pos += self.vel
->>>>>>> e6573f1bc425ebd3a0f9e033866cc007b132b435
 
 
 def main():
@@ -127,15 +124,12 @@ def main():
     last_frame = 0
     running = True
 
-<<<<<<< HEAD
-=======
     b1 = Boid(PALLETTE[0], 200, 200)
     boids = pygame.sprite.Group()
     boids.add(b1)
     a = 0
     b1.vel = np.array([0.034, -0.02], float)
-
->>>>>>> e6573f1bc425ebd3a0f9e033866cc007b132b435
+    
     while running:
         clock.tick(FRAME_CAP)
         t = pygame.time.get_ticks()
@@ -149,8 +143,6 @@ def main():
                     running = False
         screen.fill(BG_COLOR)
 
-<<<<<<< HEAD
-=======
         if a > 360:
             a = 0
         a += 2
@@ -159,7 +151,6 @@ def main():
         boids.draw(screen)
         pygame.draw.circle(screen, (255, 0, 0), b1.pos, 2)
 
->>>>>>> e6573f1bc425ebd3a0f9e033866cc007b132b435
         pygame.display.update()
 
 
