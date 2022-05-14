@@ -3,7 +3,7 @@ import numpy as np
 from sys import exit
 from random import randint
 
-WIDTH = 600
+WIDTH = 1920
 HEIGHT = 600
 FRAME_CAP = 60
 BG_COLOR = (20, 20, 20)
@@ -14,13 +14,14 @@ PALLETTE = [
     (215, 235, 209),
     (177, 216, 207),
 ]
-BOIDS = 1
+BOIDS = 400
 CAPTION = "Boids with pygame"
 ORIGIN = pygame.Vector2(0, 0)
+TURNING_FORCE = 0.5
 
-"""angle = ORIGIN.angle_to(self.vel)
-self.image = pygame.transform.rotate(self.original_image, -1 * angle)
-self.rect = self.image.get_rect(center=self.pos)"""
+
+def normalize_vector(vector: np.array):
+    return np.sqrt(np.einsum("...i, ...i", vector, vector))
 
 
 class HashMap:
@@ -93,6 +94,8 @@ class Boid(pygame.sprite.Sprite):
         self.pos = np.array([x, y], float)
         self.vel = np.array([0, 0], float)
         self.accel = np.array([0, 0], float)
+        self.view_range = 100
+        self.view_squared = self.view_range * self.view_range
         self.id = id
 
         self.hash_key = 0
@@ -104,17 +107,50 @@ class Boid(pygame.sprite.Sprite):
             + int(self.pos[1] / container_size) * table_width
         )
 
-    def update(self) -> None:
-<<<<<<< HEAD
-        pass
-=======
+    def update(self, boid_list: np.array = None, dt: float = 1) -> None:
+        # get values for behaviors
+        """total_vel = np.array([0, 0], float)
+        total_pos = np.array([0, 0], float)
+        num_boids = 0
+        dist = np.array([], float)
+        for boid in boid_list:
+            dist = (boid.pos[0] * boid.pos[0]) + (boid.pos[1] * boid.pos[1])
+            if boid != self and dist <= self.view_squared:
+                total_vel += boid.vel
+                total_pos += boid.pos
+                dist_arr = np.append(dist_arr, dist)
+                num_boids += 1
+        dist = np.argsort(dist)
+        center = np.divide(total_pos, num_boids) - self.vel - self.pos
+        align = np.divide(total_vel, num_boids)
+        avoidance = dist * (self.view_range - np.sqrt(dist))
 
-        # rotating and update the image
-        angle = ORIGIN.angle_to(self.vel)
-        self.image = pygame.transform.rotate(self.original_image, -1 * angle)
-        self.rect = self.image.get_rect(center=self.pos)
+        self.accel += center + align + avoidance"""
+
+        # edge avoidance
+        if 0 + self.pos[0] < 50:
+            self.vel[0] += TURNING_FORCE
+        if WIDTH - self.pos[0] < 50:
+            self.vel[0] -= TURNING_FORCE
+        if 0 + self.pos[1] < 50:
+            self.vel[1] += TURNING_FORCE
+        if HEIGHT - self.pos[1] < 50:
+            self.vel[1] -= TURNING_FORCE
+
+        # add values
+        self.vel += self.accel
         self.pos += self.vel
->>>>>>> e6573f1bc425ebd3a0f9e033866cc007b132b435
+
+        # new rotation for boid
+        # angle = ORIGIN.angle_to(self.vel)
+        # self.image = pygame.transform.rotate(self.original_image, -1 * angle)
+        self.rect = self.image.get_rect(center=self.pos)
+
+        # limit speed
+        n = normalize_vector(self.vel)
+        if n > 5:
+            self.vel = np.multiply(np.divide(self.vel, n), 5)
+        self.accel = np.array([0, 0], np.float16)
 
 
 def main():
@@ -127,15 +163,15 @@ def main():
     last_frame = 0
     running = True
 
-<<<<<<< HEAD
-=======
-    b1 = Boid(PALLETTE[0], 200, 200)
-    boids = pygame.sprite.Group()
-    boids.add(b1)
-    a = 0
-    b1.vel = np.array([0.034, -0.02], float)
+    boids_group = pygame.sprite.Group()
+    all_boids = np.array([], object)
 
->>>>>>> e6573f1bc425ebd3a0f9e033866cc007b132b435
+    for i in range(BOIDS):
+        b = Boid((255, 0, 0), randint(0, WIDTH), randint(0, HEIGHT))
+        b.vel = np.array([randint(-500, 500) * 0.1, randint(-500, 500) * 0.1])
+        boids_group.add(b)
+        # all_boids = np.append(all_boids, b)
+
     while running:
         clock.tick(FRAME_CAP)
         t = pygame.time.get_ticks()
@@ -149,17 +185,9 @@ def main():
                     running = False
         screen.fill(BG_COLOR)
 
-<<<<<<< HEAD
-=======
-        if a > 360:
-            a = 0
-        a += 2
+        boids_group.update()
+        boids_group.draw(screen)
 
-        boids.update()
-        boids.draw(screen)
-        pygame.draw.circle(screen, (255, 0, 0), b1.pos, 2)
-
->>>>>>> e6573f1bc425ebd3a0f9e033866cc007b132b435
         pygame.display.update()
 
 
